@@ -1,0 +1,20 @@
+{
+  "name": "teste3-qa",
+  "version": "1.0.0",
+  "description": "Projeto de teste de carga com K6 e análise de resultados",
+  "type": "module",
+  "scripts": {
+    "pretest:smoke": "node -e \"require('fs').mkdirSync('reports',{recursive:true})\"",
+    "pretest:load": "node -e \"require('fs').mkdirSync('reports',{recursive:true})\"",
+    "test:smoke": "cross-env SMOKE_VUS=2 SMOKE_DURATION=30s k6 run src/basic_load_test.js",
+    "test:load": "cross-env LOAD_VUS=10 LOAD_DURATION=2m k6 run src/basic_load_test.js",
+    "preanalyze": "node -e \"require('fs').mkdirSync('reports',{recursive:true})\"",
+    "analyze": "node tools/analyze.js"
+  },
+  "author": "Leandro Brum",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}

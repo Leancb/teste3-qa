@@ -1,0 +1,51 @@
+name: k6-qa-ci
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  k6-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Prepare reports dir
+        run: node -e "require('fs').mkdirSync('reports',{recursive:true})"
+
+      - name: Install k6
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnupg ca-certificates
+          curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Smoke test
+        run: npm run test:smoke
+
+      - name: Load test
+        run: npm run test:load
+
+      - name: Install deps for analysis
+        run: npm install
+
+      - name: Analyze report
+        run: npm run analyze
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-reports
+          path: reports/**
